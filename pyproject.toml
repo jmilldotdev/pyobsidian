@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "pyobsidian"
+version = "0.1.0"
+description = ""
+authors = ["Jonathan Miller <jon@jmill.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+sentence-transformers = "^2.0.0"
+tqdm = "^4.62.3"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+ipykernel = "^5.3.3"
+mypy = "^0.910"
+pytest = "^6.2.4"
+pre-commit = "^2.13.0"
+flake8 = "^3.9.2"
+notebook = "^6.4.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.masonry.api"
+
+[tool.mypy]
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | nbs
+)/
+'''
