@@ -1,4 +1,6 @@
 from enum import Enum
+import ast
+from pyobsidian.models import Node, NodeLink
 
 from sentence_transformers import SentenceTransformer, util
 
@@ -11,7 +13,7 @@ class EncodeType(Enum):
 
 
 class PyobsidianClient:
-    def __init__(self, scopes, model_name="paraphrase-MiniLM-L6-v2"):
+    def __init__(self, scopes=None, model_name="paraphrase-MiniLM-L6-v2"):
         self.scopes = scopes
         self.model = SentenceTransformer(model_name)
         self.blocks = None
@@ -40,3 +42,45 @@ class PyobsidianClient:
         qe = self.model.encode(query, convert_to_tensor=True)
         res = util.semantic_search(qe, self.embeddings, top_k=5)
         return res
+
+    @staticmethod
+    def format_links_literal(lit):
+        return lit.replace("false,", "False,").replace("true,", "True,")
+
+    def get_node_links(self, metadataframe, links):
+        links = ast.literal_eval(self.format_links_literal(links))
+        node_links = []
+        for link in links:
+            if link['path'].split('.')[-1] == 'md':
+                try:
+                    node_links.append(
+                        NodeLink(
+                            **{
+                                "node_id": metadataframe[
+                                    metadataframe["file.path"] == link["path"]
+                                ].index[0],
+                                "path": link["path"],
+                            }
+                        )
+                    )
+                except IndexError:
+                    print(link)
+                    print(f"Could not find node for {link['path']}")
+                    break
+        return node_links
+
+    def get_nodes(self, metadataframe):
+        nodes = [
+            Node(
+                **{
+                    "node_id": idx,
+                    "path": row["file.path"],
+                    "inlinks": self.get_node_links(metadataframe, row["file.inlinks"]),
+                    "outlinks": self.get_node_links(
+                        metadataframe, row["file.outlinks"]
+                    ),
+                }
+            )
+            for idx, row in metadataframe.iterrows()
+        ]
+        return nodes

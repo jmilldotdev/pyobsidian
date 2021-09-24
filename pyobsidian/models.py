@@ -1,4 +1,5 @@
 from pathlib import Path
+from dataclasses import dataclass
 
 from pyobsidian import const
 
@@ -25,3 +26,17 @@ class PathScope(Scope):
     @property
     def md_files(self):
         return self.full_path.rglob("*.md")
+
+
+@dataclass
+class NodeLink:
+    node_id: int
+    path: str
+
+
+@dataclass
+class Node:
+    node_id: int
+    path: str
+    inlinks: list[NodeLink]
+    outlinks: list[NodeLink]
